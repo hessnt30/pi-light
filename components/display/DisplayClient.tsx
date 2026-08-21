@@ -8,6 +8,7 @@ import {
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
+import { SummaryWidget } from "@/components/dashboard/SummaryWidget";
 import { OfflineIndicator } from "@/components/dashboard/OfflineIndicator";
 import { useCalendarEvents } from "@/lib/hooks/useCalendarEvents";
 import { useFullscreen } from "@/lib/hooks/useFullscreen";
@@ -95,6 +96,11 @@ export function DisplayClient({
         />
 
         <aside className="hidden flex-col gap-4 xl:flex">
+          <SummaryWidget
+            period={view}
+            currentDate={currentDate}
+            displayMode
+          />
           {settings.show_upcoming && (
             <UpcomingEvents
               events={rangeEvents.events}

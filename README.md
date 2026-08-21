@@ -10,6 +10,7 @@ A Skylight-inspired family calendar web app built with Next.js, TypeScript, Tail
 - **Wall display mode** — visit `/display` for a fullscreen-optimized layout
 - **Customizable** — calendar colors, theme, week start, widget toggles
 - **Auto-refresh** — events refresh every 5 minutes (3 minutes on display mode)
+- **AI summaries** — daily / weekly / monthly overview generated locally with Ollama
 - **Keyboard shortcuts** — `T` today, `←/→` navigate, `F` fullscreen, `W/M/D` switch views
 
 ## Prerequisites
@@ -99,6 +100,8 @@ cp .env.example .env.local
 | `GOOGLE_TOKEN_ENCRYPTION_KEY` | 32-byte hex string for token encryption |
 | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` (or production URL) |
 | `WEATHER_LAT` / `WEATHER_LON` | Optional default weather location |
+| `OLLAMA_HOST` | Ollama base URL (default `http://127.0.0.1:11434`) |
+| `OLLAMA_MODEL` | Model name for calendar summaries (default `llama3.2`) |
 
 ## Running Locally
 
@@ -113,6 +116,16 @@ Open [http://localhost:3000](http://localhost:3000).
 2. Go to **Settings → Connect Google Account** to grant calendar access
 3. Enable the calendars you want on the dashboard
 4. Visit `/display` for wall mode
+
+### Ollama summaries
+
+Pi Light calls a local Ollama instance to write a short family-calendar summary for the current day, week, or month (whichever view is selected).
+
+1. Install and run [Ollama](https://ollama.com) on the same machine (or another host on your LAN).
+2. Pull a model, for example: `ollama pull llama3.2`
+3. Set `OLLAMA_HOST` and `OLLAMA_MODEL` if you are not using the defaults.
+
+The dashboard sidebar and wall display both show the summary. The first load (or Refresh) generates one with Ollama and stores it in Supabase; later visits reuse the saved text.
 
 ## Deploying
 

@@ -62,3 +62,40 @@ export function useWeather(lat?: number | null, lon?: number | null, enabled = t
 
   return useSWR(key, fetcher, { refreshInterval: 900000 });
 }
+
+export type CalendarSummaryResponse = {
+  period?: CalendarView;
+  text?: string;
+  eventCount?: number;
+  model?: string;
+  generatedAt?: string;
+  cached?: boolean;
+  error?: string;
+};
+
+export function useCalendarSummary(
+  period: CalendarView,
+  currentDate: Date,
+) {
+  const date = currentDate.toISOString();
+  const key = `/api/summary?period=${period}&date=${encodeURIComponent(date)}`;
+
+  const { data, error, isLoading, isValidating, mutate } =
+    useSWR<CalendarSummaryResponse>(key, fetcher, {
+      refreshInterval: 1_800_000,
+      revalidateOnFocus: false,
+      dedupingInterval: 60_000,
+      keepPreviousData: true,
+    });
+
+  return {
+    data,
+    error,
+    isLoading,
+    isValidating,
+    refresh: async () => {
+      const next = (await fetcher(`${key}&refresh=1`)) as CalendarSummaryResponse;
+      await mutate(next, { revalidate: false });
+    },
+  };
+}

@@ -39,6 +39,18 @@ export type GoogleAccountPublic = {
   created_at: string;
 };
 
+export type CalendarSummaryRecord = {
+  id: string;
+  household_id: string;
+  period: CalendarView;
+  range_start: string;
+  range_end: string;
+  text: string;
+  event_count: number;
+  model: string;
+  generated_at: string;
+};
+
 export type CalendarRecord = {
   id: string;
   google_account_id: string;

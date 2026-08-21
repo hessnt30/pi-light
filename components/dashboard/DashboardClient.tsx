@@ -10,6 +10,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { CalendarLegend } from "@/components/dashboard/CalendarLegend";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
+import { SummaryWidget } from "@/components/dashboard/SummaryWidget";
 import { OfflineIndicator } from "@/components/dashboard/OfflineIndicator";
 import { useCalendarEvents } from "@/lib/hooks/useCalendarEvents";
 import { useFullscreen } from "@/lib/hooks/useFullscreen";
@@ -108,22 +109,21 @@ export function DashboardClient({
           <CalendarLegend />
         </div>
 
-        {(settings.show_upcoming || settings.show_weather) && (
-          <aside className="flex flex-col gap-4">
-            {settings.show_upcoming && (
-              <UpcomingEvents
-                events={rangeEvents.events}
-                timezone={settings.timezone}
-              />
-            )}
-            {settings.show_weather && (
-              <WeatherWidget
-                lat={settings.weather_lat}
-                lon={settings.weather_lon}
-              />
-            )}
-          </aside>
-        )}
+        <aside className="flex flex-col gap-4">
+          <SummaryWidget period={view} currentDate={currentDate} />
+          {settings.show_upcoming && (
+            <UpcomingEvents
+              events={rangeEvents.events}
+              timezone={settings.timezone}
+            />
+          )}
+          {settings.show_weather && (
+            <WeatherWidget
+              lat={settings.weather_lat}
+              lon={settings.weather_lon}
+            />
+          )}
+        </aside>
       </div>
     </div>
   );

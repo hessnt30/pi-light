@@ -35,6 +35,26 @@ export function getViewRange(
   }
 }
 
+/** Inclusive calendar period without the extra days month-view pads with. */
+export function getSummaryRange(
+  date: Date,
+  period: CalendarView,
+  weekStartsOn: 0 | 1,
+): { start: Date; end: Date } {
+  switch (period) {
+    case "day":
+      return { start: startOfDay(date), end: endOfDay(date) };
+    case "month":
+      return { start: startOfMonth(date), end: endOfMonth(date) };
+    case "week":
+    default:
+      return {
+        start: startOfWeek(date, { weekStartsOn }),
+        end: endOfWeek(date, { weekStartsOn }),
+      };
+  }
+}
+
 export function navigateDate(
   date: Date,
   view: CalendarView,
