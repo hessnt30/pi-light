@@ -58,7 +58,7 @@ export function DashboardClient({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col p-4 md:p-6">
-      <div className="mb-2 flex items-center justify-between">
+      <div className="relative z-10 mb-2 flex items-center justify-between">
         <Link
           href="/settings"
           className="text-sm text-muted transition-colors hover:text-foreground"

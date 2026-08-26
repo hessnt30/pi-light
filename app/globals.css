@@ -20,6 +20,146 @@
   --accent: #818cf8;
 }
 
+html[data-theme="pastel-blush"] {
+  --background: #fdf2f4;
+  --foreground: #4a2c35;
+  --surface: #fff7f8;
+  --surface-hover: #fce8ec;
+  --border: #f5d0d8;
+  --muted: #9a6b76;
+  --accent: #e8a0b0;
+}
+
+html[data-theme="pastel-mint"] {
+  --background: #f0faf6;
+  --foreground: #1f3d34;
+  --surface: #f7fdfb;
+  --surface-hover: #e3f5ee;
+  --border: #c5e8d8;
+  --muted: #5c8a7a;
+  --accent: #7ec9a8;
+}
+
+html[data-theme="pastel-lavender"] {
+  --background: #f5f2fb;
+  --foreground: #3d2f54;
+  --surface: #fbf9fe;
+  --surface-hover: #eee8f8;
+  --border: #ddd0f0;
+  --muted: #7a6b94;
+  --accent: #a78bda;
+}
+
+html[data-theme="pastel-peach"] {
+  --background: #fff4ec;
+  --foreground: #4a3228;
+  --surface: #fffaf6;
+  --surface-hover: #ffe8d9;
+  --border: #f5d4c0;
+  --muted: #9a7464;
+  --accent: #f0a07a;
+}
+
+html[data-theme="pastel-sky"] {
+  --background: #eef6fc;
+  --foreground: #1e3348;
+  --surface: #f7fbfe;
+  --surface-hover: #dceef8;
+  --border: #c5dff0;
+  --muted: #5a7a92;
+  --accent: #7eb8d8;
+}
+
+html[data-theme="halloween"] {
+  --background: #1a0e08;
+  --foreground: #f5e6c8;
+  --surface: color-mix(in srgb, #2a1810 92%, transparent);
+  --surface-hover: #3d2418;
+  --border: #5c3a1a;
+  --muted: #c4a882;
+  --accent: #f97316;
+  background-image:
+    linear-gradient(rgba(18, 8, 4, 0.55), rgba(18, 8, 4, 0.62)),
+    url("/themes/halloween-bg.jpg");
+}
+
+html[data-theme="thanksgiving"] {
+  --background: #faf3e8;
+  --foreground: #4a2e1c;
+  --surface: color-mix(in srgb, #fffaf2 90%, transparent);
+  --surface-hover: #f3e3cc;
+  --border: #e0c8a4;
+  --muted: #8a6a4a;
+  --accent: #c45c26;
+  background-image:
+    linear-gradient(rgba(250, 243, 232, 0.7), rgba(250, 243, 232, 0.76)),
+    url("/themes/thanksgiving-bg.jpg");
+}
+
+html[data-theme="christmas"] {
+  --background: #0c1f18;
+  --foreground: #f3ead8;
+  --surface: color-mix(in srgb, #163328 92%, transparent);
+  --surface-hover: #1e4436;
+  --border: #2f5c48;
+  --muted: #b7c9b8;
+  --accent: #e4453a;
+  background-image:
+    linear-gradient(rgba(8, 22, 16, 0.58), rgba(8, 22, 16, 0.66)),
+    url("/themes/christmas-bg.jpg");
+}
+
+html[data-theme="new-year"] {
+  --background: #0b1220;
+  --foreground: #f5e6c0;
+  --surface: color-mix(in srgb, #151d32 92%, transparent);
+  --surface-hover: #1e2944;
+  --border: #3a4668;
+  --muted: #b7b3c9;
+  --accent: #d4af37;
+  background-image:
+    linear-gradient(rgba(8, 12, 24, 0.58), rgba(8, 12, 24, 0.66)),
+    url("/themes/new-year-bg.jpg");
+}
+
+html[data-theme="valentines"] {
+  --background: #fde8ee;
+  --foreground: #5c1a2e;
+  --surface: color-mix(in srgb, #fff6f8 90%, transparent);
+  --surface-hover: #f8d4de;
+  --border: #f0b8c8;
+  --muted: #a05c74;
+  --accent: #e11d48;
+  background-image:
+    linear-gradient(rgba(253, 232, 238, 0.7), rgba(253, 232, 238, 0.76)),
+    url("/themes/valentines-bg.jpg");
+}
+
+html[data-theme="easter"] {
+  --background: #f7f4ee;
+  --foreground: #3d4a35;
+  --surface: color-mix(in srgb, #fffcf7 90%, transparent);
+  --surface-hover: #efe8d8;
+  --border: #ddd4c0;
+  --muted: #7a7a68;
+  --accent: #b48fd4;
+  background-image:
+    linear-gradient(rgba(247, 244, 238, 0.7), rgba(247, 244, 238, 0.76)),
+    url("/themes/easter-bg.jpg");
+}
+
+html[data-theme="halloween"],
+html[data-theme="thanksgiving"],
+html[data-theme="christmas"],
+html[data-theme="new-year"],
+html[data-theme="valentines"],
+html[data-theme="easter"] {
+  background-color: var(--background);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -32,8 +172,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  background-color: var(--background);
+}
+
 body {
-  background: var(--background);
+  background-color: transparent;
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }

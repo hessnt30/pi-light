@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAuth } from "@/lib/api/auth";
+import { THEME_MODES } from "@/lib/themes";
 
 const patchSchema = z.object({
   default_view: z.enum(["week", "month", "day"]).optional(),
@@ -8,7 +9,7 @@ const patchSchema = z.object({
   show_weather: z.boolean().optional(),
   show_clock: z.boolean().optional(),
   show_upcoming: z.boolean().optional(),
-  theme: z.enum(["light", "dark", "system"]).optional(),
+  theme: z.enum(THEME_MODES).optional(),
   timezone: z.string().optional(),
   weather_lat: z.number().nullable().optional(),
   weather_lon: z.number().nullable().optional(),

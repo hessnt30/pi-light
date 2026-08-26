@@ -1,5 +1,7 @@
+import type { ThemeMode } from "@/lib/themes";
+
+export type { ThemeMode };
 export type CalendarView = "week" | "month" | "day";
-export type ThemeMode = "light" | "dark" | "system";
 export type MemberRole = "owner" | "member";
 
 export type Household = {

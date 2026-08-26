@@ -40,8 +40,8 @@ export function DashboardHeader({
     <header
       className={
         displayMode
-          ? "flex shrink-0 items-center justify-between gap-4 px-2 py-3"
-          : "flex shrink-0 flex-wrap items-center justify-between gap-4 pb-4"
+          ? "relative z-10 flex shrink-0 items-center justify-between gap-4 px-2 py-3"
+          : "relative z-10 flex shrink-0 flex-wrap items-center justify-between gap-4 pb-4"
       }
     >
       <div className="flex items-center gap-6">

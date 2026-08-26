@@ -58,7 +58,7 @@ export function DisplayClient({
 
   return (
     <div className="flex h-screen flex-col p-4">
-      <div className="flex items-center justify-between pb-2">
+      <div className="relative z-10 flex items-center justify-between pb-2">
         <Link
           href="/settings?from=display"
           className="text-base text-muted transition-colors hover:text-foreground"
