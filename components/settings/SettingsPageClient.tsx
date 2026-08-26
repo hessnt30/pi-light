@@ -138,8 +138,15 @@ export function SettingsPageClient({
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold">Settings</h1>
         <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => router.push("/")}>
-            ← Back to calendar
+          <Button
+            variant="ghost"
+            onClick={() =>
+              router.push(searchParams.get("from") === "display" ? "/display" : "/")
+            }
+          >
+            {searchParams.get("from") === "display"
+              ? "← Back to display"
+              : "← Back to calendar"}
           </Button>
           <Button variant="ghost" onClick={signOut}>
             Sign out

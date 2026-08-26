@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { formatHeaderDate } from "@/lib/utils/format";
+import { formatHeaderDate, formatJumpLabel } from "@/lib/utils/format";
 import { ClockWidget } from "@/components/dashboard/ClockWidget";
 import type { CalendarView } from "@/lib/calendar/types";
 
@@ -66,7 +66,7 @@ export function DashboardHeader({
             ◀
           </Button>
           <Button size={displayMode ? "lg" : "md"} onClick={onToday}>
-            Today
+            {formatJumpLabel(view, timezone)}
           </Button>
           <Button size={displayMode ? "lg" : "md"} onClick={onNext} aria-label="Next">
             ▶
@@ -101,15 +101,13 @@ export function DashboardHeader({
           {isValidating ? "…" : "↻"}
         </Button>
 
-        {!minimal && (
-          <Button
-            size={displayMode ? "lg" : "md"}
-            onClick={onFullscreen}
-            aria-label="Fullscreen"
-          >
-            ⛶
-          </Button>
-        )}
+        <Button
+          size={displayMode ? "lg" : "md"}
+          onClick={onFullscreen}
+          aria-label="Fullscreen"
+        >
+          ⛶
+        </Button>
       </div>
     </header>
   );

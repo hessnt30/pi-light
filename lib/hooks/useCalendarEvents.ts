@@ -54,6 +54,22 @@ export function useSettings() {
   return useSWR("/api/settings", fetcher);
 }
 
+export type WeatherForecastDay = {
+  date: string;
+  high: number;
+  low: number;
+  description: string;
+  icon: string;
+};
+
+export type WeatherResponse = {
+  temp?: number;
+  description?: string;
+  icon?: string;
+  forecast?: WeatherForecastDay[];
+  error?: string;
+};
+
 export function useWeather(lat?: number | null, lon?: number | null, enabled = true) {
   const hasCoords = lat != null && lon != null;
   const key = enabled
@@ -62,7 +78,7 @@ export function useWeather(lat?: number | null, lon?: number | null, enabled = t
       : "/api/weather"
     : null;
 
-  return useSWR(key, fetcher, { refreshInterval: 900000 });
+  return useSWR<WeatherResponse>(key, fetcher, { refreshInterval: 900000 });
 }
 
 export type CalendarSummaryResponse = {
