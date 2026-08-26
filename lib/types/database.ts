@@ -51,6 +51,8 @@ export type CalendarSummaryRecord = {
   generated_at: string;
 };
 
+export type CalendarSource = "google_calendar" | "google_tasks";
+
 export type CalendarRecord = {
   id: string;
   google_account_id: string;
@@ -59,8 +61,11 @@ export type CalendarRecord = {
   color: string;
   enabled: boolean;
   is_primary: boolean;
+  source?: CalendarSource;
   updated_at: string;
 };
+
+export const TASKS_DEFAULT_COLOR = "#039be5";
 
 export const CALENDAR_COLORS = [
   "#6366f1",

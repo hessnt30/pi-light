@@ -5,6 +5,7 @@ A Skylight-inspired family calendar web app built with Next.js, TypeScript, Tail
 ## Features
 
 - **Google Calendar integration** — connect multiple Google accounts and merge calendars into one unified view
+- **Google Tasks** — dated tasks appear on the calendar (checkbox, strikethrough when done) like Google Calendar
 - **Week / Month / Day views** — week view is the default
 - **Household sharing** — multiple family members can contribute calendars to the same dashboard
 - **Wall display mode** — visit `/display` for a fullscreen-optimized layout
@@ -36,8 +37,7 @@ A Skylight-inspired family calendar web app built with Next.js, TypeScript, Tail
    supabase db push
 
    # Option B: Copy SQL manually
-   # Paste contents of supabase/migrations/20260820000000_initial_schema.sql
-   # into the Supabase SQL Editor and run it
+   # Run every file in supabase/migrations/ in the Supabase SQL Editor, in filename order
    ```
 
 4. Copy your project credentials from **Project Settings → API**:
@@ -53,12 +53,13 @@ You need **two** OAuth configurations: one for Supabase login, one for Calendar 
 
 In [Google Cloud Console](https://console.cloud.google.com):
 - Enable **Google Calendar API**
+- Enable **Google Tasks API**
 - Enable **Google People API** (for user info during calendar connect)
 
 ### 2. OAuth Consent Screen
 
 - Configure the OAuth consent screen (External or Internal)
-- Add scopes: `email`, `profile`, `https://www.googleapis.com/auth/calendar.readonly`
+- Add scopes: `email`, `profile`, `https://www.googleapis.com/auth/calendar.readonly`, `https://www.googleapis.com/auth/tasks`
 - While in testing mode, add test users who can sign in
 
 ### 3. OAuth Credentials
@@ -113,8 +114,8 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000).
 
 1. Sign in with Google
-2. Go to **Settings → Connect Google Account** to grant calendar access
-3. Enable the calendars you want on the dashboard
+2. Go to **Settings → Connect Google Account** to grant calendar and Tasks access
+3. Enable the calendars and task lists you want on the dashboard
 4. Visit `/display` for wall mode
 
 ### Ollama summaries
@@ -167,7 +168,7 @@ supabase/
 
 ## Architecture Notes
 
-- **Two-layer auth**: Supabase Google OAuth for app login; separate Google OAuth flow with `calendar.readonly` scope for calendar access with offline refresh tokens
+- **Two-layer auth**: Supabase Google OAuth for app login; separate Google OAuth flow with `calendar.readonly` and `tasks` scopes for calendar/task access with offline refresh tokens
 - **Server-side tokens**: Google refresh tokens are encrypted (AES-256-GCM) and never sent to the browser
 - **Normalized events**: Google API responses are mapped to an internal `CalendarEvent` type before reaching the UI
 - **Household model**: Shared calendars and settings via Postgres RLS policies

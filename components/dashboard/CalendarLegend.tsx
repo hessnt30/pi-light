@@ -9,7 +9,10 @@ export function CalendarLegend({
   displayMode?: boolean;
 }) {
   const { data, mutate } = useCalendars();
-  const calendars = data?.calendars ?? [];
+  const calendars = [...(data?.calendars ?? [])].sort((a, b) => {
+    if (a.source === b.source) return a.name.localeCompare(b.name);
+    return a.source === "google_tasks" ? 1 : -1;
+  });
 
   async function toggle(id: string, enabled: boolean) {
     await fetch(`/api/calendars/${id}`, {
@@ -37,10 +40,17 @@ export function CalendarLegend({
               : "border-transparent bg-surface-hover opacity-50",
           )}
         >
-          <span
-            className="h-3 w-3 rounded-full"
-            style={{ backgroundColor: cal.color }}
-          />
+          {cal.source === "google_tasks" ? (
+            <span
+              className="inline-flex h-3 w-3 items-center justify-center rounded-full border-2"
+              style={{ borderColor: cal.color }}
+            />
+          ) : (
+            <span
+              className="h-3 w-3 rounded-full"
+              style={{ backgroundColor: cal.color }}
+            />
+          )}
           <span className="font-medium">{cal.name}</span>
         </button>
       ))}

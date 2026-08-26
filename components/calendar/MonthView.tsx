@@ -2,14 +2,17 @@
 
 import { format, isSameDay, isSameMonth, parseISO } from "date-fns";
 import { cn } from "@/lib/utils/cn";
-import { getMonthWeeks } from "@/lib/calendar/ranges";
+import { TaskCheckbox } from "@/components/calendar/EventBlock";
+import { eventOccursOnDay, getMonthWeeks } from "@/lib/calendar/ranges";
 import type { CalendarEvent } from "@/lib/calendar/types";
+import { isTask } from "@/lib/calendar/types";
 
 export function MonthView({
   currentDate,
   events,
   weekStartsOn,
   onEventClick,
+  onTaskToggle,
   onDayClick,
   displayMode = false,
 }: {
@@ -17,6 +20,7 @@ export function MonthView({
   events: CalendarEvent[];
   weekStartsOn: 0 | 1;
   onEventClick: (event: CalendarEvent) => void;
+  onTaskToggle?: (event: CalendarEvent) => void;
   onDayClick: (date: Date) => void;
   displayMode?: boolean;
 }) {
@@ -26,7 +30,7 @@ export function MonthView({
     : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   function dayEvents(day: Date) {
-    return events.filter((e) => isSameDay(parseISO(e.start), day));
+    return events.filter((e) => eventOccursOnDay(e, day));
   }
 
   return (
@@ -54,46 +58,60 @@ export function MonthView({
               const extra = dayEvts.length - 3;
 
               return (
-                <button
+                <div
                   key={day.toISOString()}
-                  type="button"
-                  onClick={() => onDayClick(day)}
                   className={cn(
-                    "flex flex-col border-r border-border p-1 text-left last:border-r-0 hover:bg-surface-hover",
+                    "flex flex-col border-r border-border p-1 text-left last:border-r-0",
                     !isSameMonth(day, currentDate) && "opacity-40",
                     isSameDay(day, new Date()) && "bg-accent/10",
                   )}
                 >
-                  <span
+                  <button
+                    type="button"
+                    onClick={() => onDayClick(day)}
                     className={cn(
-                      "mb-1 font-semibold",
+                      "mb-1 self-start font-semibold hover:underline",
                       displayMode ? "text-xl" : "text-base",
                       isSameDay(day, new Date()) && "text-accent",
                     )}
                   >
                     {format(day, "d")}
-                  </span>
+                  </button>
                   <div className="flex flex-col gap-0.5 overflow-hidden">
                     {visible.map((e) => (
                       <button
                         key={e.id}
                         type="button"
-                        onClick={(ev) => {
-                          ev.stopPropagation();
-                          onEventClick(e);
-                        }}
+                        onClick={() => onEventClick(e)}
                         className={cn(
-                          "truncate rounded px-1 py-0.5 text-left font-medium",
+                          "flex items-center gap-1 truncate rounded px-1 py-0.5 text-left font-medium hover:bg-surface-hover",
                           displayMode ? "text-sm" : "text-xs",
+                          e.completed && "opacity-60",
                         )}
                         style={{
                           backgroundColor: `${e.calendarColor}33`,
                           color: e.calendarColor,
                         }}
                       >
-                        {e.isBirthday && "🎂 "}
-                        {!e.allDay && format(parseISO(e.start), "h:mm")}{" "}
-                        {e.title}
+                        {isTask(e) && (
+                          <TaskCheckbox
+                            completed={Boolean(e.completed)}
+                            color={e.calendarColor}
+                            onToggle={
+                              onTaskToggle ? () => onTaskToggle(e) : undefined
+                            }
+                          />
+                        )}
+                        <span
+                          className={cn(
+                            "truncate",
+                            e.completed && "line-through",
+                          )}
+                        >
+                          {e.isBirthday && "🎂 "}
+                          {!e.allDay && format(parseISO(e.start), "h:mm")}{" "}
+                          {e.title}
+                        </span>
                       </button>
                     ))}
                     {extra > 0 && (
@@ -102,7 +120,7 @@ export function MonthView({
                       </span>
                     )}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>

@@ -1,5 +1,5 @@
+import { format, parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
-import { parseISO } from "date-fns";
 import type { CalendarEvent, CalendarView } from "@/lib/calendar/types";
 import { getOllamaConfig, ollamaChat } from "@/lib/ollama/client";
 
@@ -32,21 +32,30 @@ export function formatEventsForPrompt(
   events: CalendarEvent[],
   timezone: string,
 ): string {
-  if (!events.length) return "(no events)";
+  const visible = events.filter(
+    (event) => event.kind !== "task" || !event.completed,
+  );
+  if (!visible.length) return "(no events)";
 
-  return events
+  return visible
     .map((event) => {
-      const start = parseISO(event.start);
-      const end = parseISO(event.end);
-      const day = formatInTimeZone(start, timezone, "EEE MMM d");
+      const day = event.allDay
+        ? formatCivilDate(event.start.slice(0, 10))
+        : formatInTimeZone(parseISO(event.start), timezone, "EEE MMM d");
       const time = event.allDay
         ? "all day"
-        : `${formatInTimeZone(start, timezone, "h:mm a")}–${formatInTimeZone(end, timezone, "h:mm a")}`;
+        : `${formatInTimeZone(parseISO(event.start), timezone, "h:mm a")}–${formatInTimeZone(parseISO(event.end), timezone, "h:mm a")}`;
       const birthday = event.isBirthday ? " (birthday)" : "";
+      const task = event.kind === "task" ? " (task)" : "";
       const location = event.location ? ` @ ${event.location}` : "";
-      return `- ${day} ${time}: ${event.title}${birthday}${location} [${event.calendarName}]`;
+      return `- ${day} ${time}: ${event.title}${birthday}${task}${location} [${event.calendarName}]`;
     })
     .join("\n");
+}
+
+function formatCivilDate(dateKey: string): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return format(new Date(year, month - 1, day), "EEE MMM d");
 }
 
 function emptySummary(
@@ -85,9 +94,10 @@ export async function generateCalendarSummary(
         role: "system",
         content: [
           "You write brief, warm summaries of a household family calendar.",
-          "Only mention events from the provided list. Never invent events, times, or people.",
+          "Only mention events and tasks from the provided list. Never invent events, times, or people.",
           "Use first names and weekday names. Prefer natural language over a bullet list.",
           "Keep the tone practical — useful on a wall display the family glances at.",
+          "Treat items marked (task) as to-dos due that day, not appointments.",
         ].join(" "),
       },
       {

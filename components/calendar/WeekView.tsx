@@ -1,28 +1,28 @@
 "use client";
 
-import { format, isSameDay, parseISO } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { cn } from "@/lib/utils/cn";
 import { AllDayChip, EventBlock } from "@/components/calendar/EventBlock";
 import {
   getTimeBounds,
   layoutOverlappingEvents,
 } from "@/lib/calendar/overlap";
-import { getWeekDays } from "@/lib/calendar/ranges";
+import { eventOccursOnDay, getWeekDays } from "@/lib/calendar/ranges";
 import type { CalendarEvent } from "@/lib/calendar/types";
 
 export function WeekView({
   currentDate,
   events,
   weekStartsOn,
-  timezone,
   onEventClick,
+  onTaskToggle,
   displayMode = false,
 }: {
   currentDate: Date;
   events: CalendarEvent[];
   weekStartsOn: 0 | 1;
-  timezone: string;
   onEventClick: (event: CalendarEvent) => void;
+  onTaskToggle?: (event: CalendarEvent) => void;
   displayMode?: boolean;
 }) {
   const days = getWeekDays(currentDate, weekStartsOn);
@@ -34,7 +34,7 @@ export function WeekView({
   );
 
   function dayEvents(day: Date) {
-    return events.filter((e) => isSameDay(parseISO(e.start), day));
+    return events.filter((e) => eventOccursOnDay(e, day));
   }
 
   function allDayEvents(day: Date) {
@@ -95,6 +95,7 @@ export function WeekView({
                   key={e.id}
                   event={e}
                   onClick={onEventClick}
+                  onTaskToggle={onTaskToggle}
                   displayMode={displayMode}
                 />
               ))}
@@ -154,6 +155,7 @@ export function WeekView({
                     startHour={startHour}
                     endHour={endHour}
                     onClick={onEventClick}
+                    onTaskToggle={onTaskToggle}
                     displayMode={displayMode}
                   />
                 ))}

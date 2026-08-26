@@ -4,11 +4,14 @@ import {
   endOfDay,
   endOfMonth,
   endOfWeek,
+  format,
+  isSameDay,
+  parseISO,
   startOfDay,
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import type { CalendarView } from "@/lib/calendar/types";
+import type { CalendarEvent, CalendarView } from "@/lib/calendar/types";
 
 export function getViewRange(
   date: Date,
@@ -94,4 +97,18 @@ export function getMonthWeeks(
   }
 
   return weeks;
+}
+
+/** All-day items use the calendar date in the string, not the viewer's timezone. */
+export function eventOccursOnDay(event: CalendarEvent, day: Date): boolean {
+  if (event.allDay) {
+    const dayKey = format(day, "yyyy-MM-dd");
+    const startKey = event.start.slice(0, 10);
+    const endKey = event.end.slice(0, 10);
+    if (endKey && endKey > startKey) {
+      return startKey <= dayKey && dayKey < endKey;
+    }
+    return startKey === dayKey;
+  }
+  return isSameDay(parseISO(event.start), day);
 }

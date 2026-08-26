@@ -59,7 +59,7 @@ export function CalendarShell({
     [onDateChange],
   );
 
-  const { events, refresh } = useCalendarEvents(
+  const { events, refresh, mutate } = useCalendarEvents(
     currentDate,
     view,
     settings.week_starts_on,
@@ -69,6 +69,49 @@ export function CalendarShell({
   if (refreshRef) {
     refreshRef.current = refresh;
   }
+
+  const onTaskToggle = useCallback(
+    async (event: CalendarEvent) => {
+      if (event.kind !== "task") return;
+      const completed = !event.completed;
+
+      await mutate(
+        (current) =>
+          current
+            ? {
+                ...current,
+                events: current.events.map((item) =>
+                  item.id === event.id ? { ...item, completed } : item,
+                ),
+              }
+            : current,
+        { revalidate: false },
+      );
+      setSelectedEvent((prev) =>
+        prev?.id === event.id ? { ...prev, completed } : prev,
+      );
+
+      const res = await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          calendarId: event.calendarId,
+          taskId: event.googleEventId,
+          completed,
+        }),
+      });
+
+      if (!res.ok) {
+        await mutate();
+        setSelectedEvent((prev) =>
+          prev?.id === event.id
+            ? { ...prev, completed: event.completed }
+            : prev,
+        );
+      }
+    },
+    [mutate],
+  );
 
   const handlers = useMemo(
     () => ({
@@ -95,8 +138,8 @@ export function CalendarShell({
             currentDate={currentDate}
             events={events}
             weekStartsOn={settings.week_starts_on}
-            timezone={settings.timezone}
             onEventClick={setSelectedEvent}
+            onTaskToggle={onTaskToggle}
             displayMode={displayMode}
           />
         )}
@@ -106,6 +149,7 @@ export function CalendarShell({
             events={events}
             weekStartsOn={settings.week_starts_on}
             onEventClick={setSelectedEvent}
+            onTaskToggle={onTaskToggle}
             onDayClick={(day) => {
               setCurrentDate(day);
               setView("day");
@@ -118,6 +162,7 @@ export function CalendarShell({
             currentDate={currentDate}
             events={events}
             onEventClick={setSelectedEvent}
+            onTaskToggle={onTaskToggle}
             displayMode={displayMode}
           />
         )}
@@ -127,6 +172,7 @@ export function CalendarShell({
         event={selectedEvent}
         timezone={settings.timezone}
         onClose={() => setSelectedEvent(null)}
+        onTaskToggle={onTaskToggle}
       />
     </div>
   );

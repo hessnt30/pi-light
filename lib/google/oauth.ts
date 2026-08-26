@@ -4,6 +4,7 @@ import { decryptToken, encryptToken } from "@/lib/google/token-store";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/calendar.readonly",
+  "https://www.googleapis.com/auth/tasks",
   "https://www.googleapis.com/auth/userinfo.email",
   "https://www.googleapis.com/auth/userinfo.profile",
   "openid",
@@ -22,6 +23,7 @@ export function getAuthUrl(state: string) {
   return client.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
+    include_granted_scopes: true,
     scope: SCOPES,
     state,
   });
