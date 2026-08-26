@@ -44,6 +44,12 @@ export function formatHeaderDate(date: Date, view: string): string {
   return format(date, "MMMM d, yyyy");
 }
 
+export function formatJumpLabel(view: string, timezone: string): string {
+  if (view === "week") return "This Week";
+  if (view === "month") return formatInTimeZone(new Date(), timezone, "MMMM");
+  return "Today";
+}
+
 export function formatUpdatedAgo(timestamp: number): string {
   return formatDistanceToNow(timestamp, { addSuffix: true });
 }

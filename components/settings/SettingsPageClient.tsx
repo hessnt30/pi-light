@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import { createClient } from "@/lib/supabase/client";
 import { CALENDAR_COLORS, TASKS_DEFAULT_COLOR } from "@/lib/types/database";
-import type { CalendarView, DisplaySettings, ThemeMode } from "@/lib/types/database";
+import type { CalendarView, DisplaySettings } from "@/lib/types/database";
 import { useCalendars, useSettings } from "@/lib/hooks/useCalendarEvents";
 import { useTheme } from "@/lib/hooks/useTheme";
+import { coerceTheme } from "@/lib/themes";
+import { ThemePicker } from "@/components/settings/ThemePicker";
 
 export function SettingsPageClient({
   initialSettings,
@@ -55,7 +57,7 @@ export function SettingsPageClient({
     });
 
     if (res.ok) {
-      if (updates.theme) setTheme(updates.theme as ThemeMode);
+      if (updates.theme) setTheme(updates.theme);
       mutateSettings();
       setMessage("Settings saved");
     }
@@ -134,12 +136,19 @@ export function SettingsPageClient({
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 p-6">
+    <div className="relative z-10 mx-auto max-w-3xl space-y-8 p-6 pb-28">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold">Settings</h1>
         <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => router.push("/")}>
-            ← Back to calendar
+          <Button
+            variant="ghost"
+            onClick={() =>
+              router.push(searchParams.get("from") === "display" ? "/display" : "/")
+            }
+          >
+            {searchParams.get("from") === "display"
+              ? "← Back to display"
+              : "← Back to calendar"}
           </Button>
           <Button variant="ghost" onClick={signOut}>
             Sign out
@@ -287,20 +296,10 @@ export function SettingsPageClient({
             />
           </label>
 
-          <label className="block">
-            <span className="text-sm text-muted">Theme</span>
-            <select
-              value={settings.theme}
-              onChange={(e) =>
-                saveSettings({ theme: e.target.value as ThemeMode })
-              }
-              className="mt-1 block w-full rounded-xl border border-border bg-background px-4 py-2"
-            >
-              <option value="system">System</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </label>
+          <ThemePicker
+            value={coerceTheme(settings.theme)}
+            onChange={(theme) => saveSettings({ theme })}
+          />
 
           <Toggle
             label="Show clock"

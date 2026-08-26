@@ -4,7 +4,8 @@ import { getDisplaySettings, getHouseholdContext } from "@/lib/household/context
 import { DisplayClient } from "@/components/display/DisplayClient";
 import { ThemeProvider } from "@/lib/hooks/useTheme";
 import { DEFAULT_DISPLAY_SETTINGS } from "@/lib/types/database";
-import type { DisplaySettings, ThemeMode } from "@/lib/types/database";
+import type { DisplaySettings } from "@/lib/types/database";
+import { coerceTheme } from "@/lib/themes";
 
 export default async function DisplayPage() {
   const supabase = await createClient();
@@ -27,11 +28,11 @@ export default async function DisplayPage() {
     updated_at: new Date().toISOString(),
   };
 
-  const theme = displaySettings.theme as ThemeMode;
+  const theme = coerceTheme(displaySettings.theme);
 
   return (
     <ThemeProvider initialTheme={theme}>
-      <div className="h-screen bg-background">
+      <div className="h-screen">
         <DisplayClient settings={displaySettings} />
       </div>
     </ThemeProvider>
