@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import { createClient } from "@/lib/supabase/client";
-import { CALENDAR_COLORS } from "@/lib/types/database";
+import { CALENDAR_COLORS, TASKS_DEFAULT_COLOR } from "@/lib/types/database";
 import type { CalendarView, DisplaySettings, ThemeMode } from "@/lib/types/database";
 import { useCalendars, useSettings } from "@/lib/hooks/useCalendarEvents";
 import { useTheme } from "@/lib/hooks/useTheme";
@@ -36,8 +36,12 @@ export function SettingsPageClient({
   const [message, setMessage] = useState<string | null>(null);
 
   const calendars = calendarsData?.calendars ?? [];
+  const googleCalendars = calendars.filter((c) => c.source !== "google_tasks");
+  const taskLists = calendars.filter((c) => c.source === "google_tasks");
   const connected = searchParams.get("connected");
   const error = searchParams.get("error");
+  const needsTasksReconnect =
+    accounts.length > 0 && taskLists.length === 0;
 
   async function saveSettings(updates: Partial<DisplaySettings>) {
     setSaving(true);
@@ -77,8 +81,22 @@ export function SettingsPageClient({
   }
 
   async function syncAccount(id: string) {
-    await fetch(`/api/google/accounts/${id}/sync`, { method: "POST" });
-    mutateCalendars();
+    const res = await fetch(`/api/google/accounts/${id}/sync`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    await mutateCalendars();
+    if (!res.ok) {
+      setMessage("Sync failed. Try reconnecting the Google account.");
+      return;
+    }
+    if (data.tasksError) {
+      setMessage(data.tasksError);
+    } else if (data.taskLists > 0) {
+      setMessage(
+        `Synced ${data.calendars} calendars and ${data.taskLists} task lists.`,
+      );
+    } else {
+      setMessage(`Synced ${data.calendars ?? 0} calendars.`);
+    }
   }
 
   async function regenerateInvite() {
@@ -175,46 +193,49 @@ export function SettingsPageClient({
         >
           Connect Google Account
         </Button>
+        {needsTasksReconnect && (
+          <p className="mt-3 text-sm text-muted">
+            Reconnect each Google account to grant Tasks access and show
+            due tasks on the calendar.
+          </p>
+        )}
       </section>
 
       {/* Calendars */}
       <section className="rounded-2xl border border-border bg-surface p-6">
         <h2 className="mb-4 text-xl font-semibold">Calendars</h2>
-        {calendars.length === 0 ? (
+        {googleCalendars.length === 0 ? (
           <p className="text-muted">Connect a Google account to see calendars.</p>
         ) : (
           <div className="space-y-4">
-            {calendars.map((cal) => (
-              <div
+            {googleCalendars.map((cal) => (
+              <CalendarRow
                 key={cal.id}
-                className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border px-4 py-3"
-              >
-                <div>
-                  <p className="font-medium">{cal.name}</p>
-                  <p className="text-sm text-muted">{cal.google_email}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex gap-1">
-                    {CALENDAR_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => updateCalendar(cal.id, { color })}
-                        className="h-6 w-6 rounded-full border-2 border-transparent hover:border-foreground"
-                        style={{
-                          backgroundColor: color,
-                          outline: cal.color === color ? "2px solid var(--foreground)" : undefined,
-                        }}
-                        aria-label={`Color ${color}`}
-                      />
-                    ))}
-                  </div>
-                  <Toggle
-                    checked={cal.enabled}
-                    onChange={(enabled) => updateCalendar(cal.id, { enabled })}
-                  />
-                </div>
-              </div>
+                cal={cal}
+                onUpdate={updateCalendar}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Task lists */}
+      <section className="rounded-2xl border border-border bg-surface p-6">
+        <h2 className="mb-4 text-xl font-semibold">Google Tasks</h2>
+        {taskLists.length === 0 ? (
+          <p className="text-muted">
+            {accounts.length
+              ? "No task lists yet. Enable the Google Tasks API in Google Cloud, then reconnect or click Sync. Only tasks with a due date appear on the calendar."
+              : "Connect a Google account to show Tasks on the calendar."}
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {taskLists.map((cal) => (
+              <CalendarRow
+                key={cal.id}
+                cal={cal}
+                onUpdate={updateCalendar}
+              />
             ))}
           </div>
         )}
@@ -385,6 +406,58 @@ export function SettingsPageClient({
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function CalendarRow({
+  cal,
+  onUpdate,
+}: {
+  cal: {
+    id: string;
+    name: string;
+    color: string;
+    enabled: boolean;
+    google_email: string;
+  };
+  onUpdate: (
+    id: string,
+    updates: { enabled?: boolean; color?: string },
+  ) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border px-4 py-3">
+      <div>
+        <p className="font-medium">{cal.name}</p>
+        <p className="text-sm text-muted">{cal.google_email}</p>
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="flex gap-1">
+          {[TASKS_DEFAULT_COLOR, ...CALENDAR_COLORS]
+            .filter((color, index, all) => all.indexOf(color) === index)
+            .map((color) => (
+              <button
+                key={color}
+                type="button"
+                onClick={() => onUpdate(cal.id, { color })}
+                className="h-6 w-6 rounded-full border-2 border-transparent hover:border-foreground"
+                style={{
+                  backgroundColor: color,
+                  outline:
+                    cal.color === color
+                      ? "2px solid var(--foreground)"
+                      : undefined,
+                }}
+                aria-label={`Color ${color}`}
+              />
+            ))}
+        </div>
+        <Toggle
+          checked={cal.enabled}
+          onChange={(enabled) => onUpdate(cal.id, { enabled })}
+        />
+      </div>
     </div>
   );
 }

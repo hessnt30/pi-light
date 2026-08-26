@@ -1,3 +1,5 @@
+export type CalendarEventKind = "event" | "task";
+
 export type CalendarEvent = {
   id: string;
   googleEventId: string;
@@ -14,7 +16,13 @@ export type CalendarEvent = {
   htmlLink?: string;
   status: "confirmed" | "tentative" | "cancelled";
   isBirthday?: boolean;
+  kind?: CalendarEventKind;
+  completed?: boolean;
 };
+
+export function isTask(event: CalendarEvent): boolean {
+  return event.kind === "task";
+}
 
 export type CalendarView = "week" | "month" | "day";
 

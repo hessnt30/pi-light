@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
+import { resolvedCalendarSource } from "@/lib/google/calendar-rows";
 
 export async function GET() {
   const auth = await requireAuth();
@@ -15,11 +16,16 @@ export async function GET() {
     return NextResponse.json({ calendars: [] });
   }
 
-  const { data: calendars } = await auth.supabase
+  const { data: calendars, error } = await auth.supabase
     .from("calendars")
     .select("*, google_accounts!inner(google_email)")
     .in("google_account_id", accountIds)
     .order("name");
+
+  if (error) {
+    console.error("Failed to load calendars:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   const enriched = (calendars ?? []).map((cal) => {
     const account = cal.google_accounts as unknown as
@@ -29,7 +35,11 @@ export async function GET() {
       ? account[0]?.google_email
       : account?.google_email;
     const { google_accounts: _, ...rest } = cal;
-    return { ...rest, google_email: email };
+    return {
+      ...rest,
+      google_email: email,
+      source: resolvedCalendarSource(cal),
+    };
   });
 
   return NextResponse.json({ calendars: enriched });

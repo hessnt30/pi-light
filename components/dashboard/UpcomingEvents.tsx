@@ -1,8 +1,10 @@
 "use client";
 
 import { parseISO, isAfter } from "date-fns";
+import { TaskCheckbox } from "@/components/calendar/EventBlock";
 import { formatEventDate, formatEventTime } from "@/lib/utils/format";
 import type { CalendarEvent } from "@/lib/calendar/types";
+import { isTask } from "@/lib/calendar/types";
 
 export function UpcomingEvents({
   events,
@@ -17,7 +19,10 @@ export function UpcomingEvents({
 }) {
   const now = new Date();
   const upcoming = events
-    .filter((e) => isAfter(parseISO(e.end), now))
+    .filter((e) => {
+      if (isTask(e)) return !e.completed;
+      return isAfter(parseISO(e.end), now);
+    })
     .slice(0, limit);
 
   const nextEvent = upcoming[0];
@@ -51,10 +56,19 @@ export function UpcomingEvents({
       <ul className="space-y-3">
         {upcoming.map((event) => (
           <li key={event.id} className="flex gap-3">
-            <span
-              className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
-              style={{ backgroundColor: event.calendarColor }}
-            />
+            {isTask(event) ? (
+              <span className="mt-1 shrink-0">
+                <TaskCheckbox
+                  completed={false}
+                  color={event.calendarColor}
+                />
+              </span>
+            ) : (
+              <span
+                className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: event.calendarColor }}
+              />
+            )}
             <div className="min-w-0">
               <p className={displayMode ? "truncate text-lg font-medium" : "truncate font-medium"}>
                 {event.isBirthday && "🎂 "}

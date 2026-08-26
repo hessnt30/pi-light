@@ -1,28 +1,29 @@
 "use client";
 
-import { format, isSameDay, parseISO } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { cn } from "@/lib/utils/cn";
 import { AllDayChip, EventBlock } from "@/components/calendar/EventBlock";
 import {
   getTimeBounds,
   layoutOverlappingEvents,
 } from "@/lib/calendar/overlap";
+import { eventOccursOnDay } from "@/lib/calendar/ranges";
 import type { CalendarEvent } from "@/lib/calendar/types";
 
 export function DayView({
   currentDate,
   events,
   onEventClick,
+  onTaskToggle,
   displayMode = false,
 }: {
   currentDate: Date;
   events: CalendarEvent[];
   onEventClick: (event: CalendarEvent) => void;
+  onTaskToggle?: (event: CalendarEvent) => void;
   displayMode?: boolean;
 }) {
-  const dayEvents = events.filter((e) =>
-    isSameDay(parseISO(e.start), currentDate),
-  );
+  const dayEvents = events.filter((e) => eventOccursOnDay(e, currentDate));
   const allDay = dayEvents.filter((e) => e.allDay);
   const timed = dayEvents.filter((e) => !e.allDay);
   const { startHour, endHour } = getTimeBounds(timed);
@@ -55,6 +56,7 @@ export function DayView({
               key={e.id}
               event={e}
               onClick={onEventClick}
+              onTaskToggle={onTaskToggle}
               displayMode={displayMode}
             />
           ))}
@@ -98,6 +100,7 @@ export function DayView({
                 startHour={startHour}
                 endHour={endHour}
                 onClick={onEventClick}
+                onTaskToggle={onTaskToggle}
                 displayMode={displayMode}
               />
             ))}

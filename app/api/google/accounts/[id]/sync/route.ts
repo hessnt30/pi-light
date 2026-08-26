@@ -21,6 +21,9 @@ export async function POST(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const count = await syncCalendarsForAccount(auth.supabase, id);
-  return NextResponse.json({ synced: count });
+  const result = await syncCalendarsForAccount(auth.supabase, id);
+  return NextResponse.json({
+    synced: result.calendars + result.taskLists,
+    ...result,
+  });
 }

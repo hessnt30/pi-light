@@ -33,6 +33,7 @@ export function useCalendarEvents(
     error,
     isLoading,
     isValidating,
+    mutate,
     refresh: () => mutate(),
     isOffline: Boolean(error && data),
   };
@@ -45,6 +46,7 @@ export function useCalendars() {
     color: string;
     enabled: boolean;
     google_email: string;
+    source?: "google_calendar" | "google_tasks";
   }> }>("/api/calendars", fetcher, { refreshInterval: 60000 });
 }
 

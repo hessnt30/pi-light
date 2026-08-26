@@ -18,10 +18,24 @@ export function formatEventDate(
   dateStr: string,
   timezone: string,
 ): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const todayKey = formatInTimeZone(new Date(), timezone, "yyyy-MM-dd");
+    const tomorrowKey = addCalendarDays(todayKey, 1);
+    if (dateStr === todayKey) return "Today";
+    if (dateStr === tomorrowKey) return "Tomorrow";
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return format(new Date(year, month - 1, day), "EEE, MMM d");
+  }
+
   const date = parseISO(dateStr);
   if (isToday(date)) return "Today";
   if (isTomorrow(date)) return "Tomorrow";
   return formatInTimeZone(date, timezone, "EEE, MMM d");
+}
+
+function addCalendarDays(dateKey: string, days: number): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
 }
 
 export function formatHeaderDate(date: Date, view: string): string {
